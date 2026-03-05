@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
-import { ArrowRight, Heart, TrendingUp, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Heart, TrendingUp, Users, GraduationCap, Church, Eye, UserCheck, X } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import ProgressRing from "@/components/church/ProgressRing";
 import StatsCard from "@/components/church/StatsCard";
 import LeaderboardItem from "@/components/church/LeaderboardItem";
@@ -9,8 +10,17 @@ import { usePublicDashboard } from "@/hooks/useChurchData";
 
 const ANNUAL_GOAL = 500000; // Configurable church annual goal
 
+const CATEGORIES = [
+  { id: "church_member", label: "Church Member", icon: Church, description: "Registered church member", requiresAuth: true },
+  { id: "student", label: "Student", icon: GraduationCap, description: "Student member", requiresAuth: true },
+  { id: "visitor", label: "Visitor", icon: Eye, description: "First-time or occasional visitor", requiresAuth: false },
+  { id: "regular", label: "Regular", icon: UserCheck, description: "Regular attendee", requiresAuth: false },
+];
+
 const Index = () => {
   const { data, isLoading } = usePublicDashboard();
+  const [showPicker, setShowPicker] = useState(false);
+  const navigate = useNavigate();
 
   const totalCollected = data?.total_collected ?? 0;
   const percentage = ANNUAL_GOAL > 0 ? (totalCollected / ANNUAL_GOAL) * 100 : 0;
@@ -84,14 +94,14 @@ const Index = () => {
           </motion.div>
 
           <motion.div variants={item}>
-            <Link
-              to="/auth"
+            <button
+              onClick={() => setShowPicker(true)}
               className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl gradient-gold text-primary-foreground font-bold text-lg shadow-lg transition-all hover:scale-105 hover:shadow-xl glow-gold"
             >
               <Heart className="w-5 h-5" />
               Press Here to Contribute
               <ArrowRight className="w-5 h-5" />
-            </Link>
+            </button>
           </motion.div>
         </motion.div>
       </section>
@@ -180,6 +190,61 @@ const Index = () => {
           </motion.div>
         </section>
       )}
+
+      {/* Category Picker Modal */}
+      <AnimatePresence>
+        {showPicker && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowPicker(false)}
+          >
+            <motion.div
+              className="bg-card border border-border rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-display text-foreground">I am a...</h2>
+                <button onClick={() => setShowPicker(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                {CATEGORIES.map((cat) => (
+                  <motion.button
+                    key={cat.id}
+                    onClick={() => {
+                      setShowPicker(false);
+                      if (cat.requiresAuth) {
+                        navigate(`/auth?category=${cat.id}`);
+                      } else {
+                        navigate(`/guest-dashboard?category=${cat.id}`);
+                      }
+                    }}
+                    className="flex items-center gap-4 p-4 rounded-2xl border border-border bg-background hover:border-primary hover:bg-primary/5 transition-all text-left group"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                      <cat.icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{cat.label}</p>
+                      <p className="text-xs text-muted-foreground">{cat.description}</p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Footer */}
       <footer className="border-t border-border py-8">
