@@ -1,13 +1,22 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, ArrowRight, UserPlus, LogIn } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/church/Header";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
+const CATEGORY_LABELS: Record<string, string> = {
+  church_member: "Church Member",
+  student: "Student",
+};
+
 const Auth = () => {
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get("category") ?? "church_member";
+  const categoryLabel = CATEGORY_LABELS[category] ?? "Church Member";
+
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,7 +51,7 @@ const Auth = () => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName, category } },
     });
     setLoading(false);
     if (error) {
@@ -71,9 +80,10 @@ const Auth = () => {
             <Mail className="w-7 h-7 text-primary-foreground" />
           </motion.div>
 
-          <h1 className="text-2xl font-display text-foreground mb-2">
+          <h1 className="text-2xl font-display text-foreground mb-1">
             {mode === "login" ? "Welcome Back" : "Join Us"}
           </h1>
+          <p className="text-xs font-semibold text-primary mb-1">Signing in as {categoryLabel}</p>
           <p className="text-sm text-muted-foreground mb-8">
             {mode === "login" ? "Sign in to your account" : "Create your account to get started"}
           </p>

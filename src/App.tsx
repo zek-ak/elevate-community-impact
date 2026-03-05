@@ -11,6 +11,7 @@ import Leaderboard from "./pages/Leaderboard";
 import SuperAdminDashboard from "./pages/SuperAdminDashboard";
 import FinanceAdminDashboard from "./pages/FinanceAdminDashboard";
 import GroupLeaderDashboard from "./pages/GroupLeaderDashboard";
+import GuestDashboard from "./pages/GuestDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/leaderboard" element={<Leaderboard />} />
             <Route path="/admin" element={<SuperAdminDashboard />} />
             <Route path="/finance" element={<FinanceAdminDashboard />} />
+            <Route path="/guest-dashboard" element={<GuestDashboard />} />
             <Route path="/group-leader" element={<GroupLeaderDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
