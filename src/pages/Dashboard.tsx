@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMemberDashboard } from "@/hooks/useChurchData";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import Header from "@/components/church/Header";
 import ProgressRing from "@/components/church/ProgressRing";
 import StatsCard from "@/components/church/StatsCard";

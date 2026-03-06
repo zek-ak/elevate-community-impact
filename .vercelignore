@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+bun.lockb
+
+# Build outputs
+dist
+dist-ssr
+
+# Test files
+src/test
+vitest.config.ts
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Development
+.eslint.config.js
+eslint.config.js
+.gitignore
+.vscode
+*.log
+*.lock
+
+# Supabase local config
+supabase
+
+# Documentation
+README.md
+TODO.md
+
+# Assets that shouldn't be deployed
+public/placeholder.svg
+
+# Environment files (secrets should be set in Vercel dashboard)
+.env
+.env.*
+

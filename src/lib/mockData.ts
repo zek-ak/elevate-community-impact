@@ -1,6 +1,6 @@
 // Mock data for the church fundraising system
 export const MOCK_CHURCH = {
-  name: "Grace Community Church",
+  name: "Chuo Kikuu SDA Church",
   annualGoal: 500000,
   totalCollected: 187500,
   currentProject: {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, ArrowRight, UserPlus, LogIn } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import Header from "@/components/church/Header";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";

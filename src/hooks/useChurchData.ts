@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import type { Json } from "@/integrations/supabase/types";
+import { supabase } from "@/lib/supabase";
+import type { Json } from "@/types/supabase";
 
 interface PublicDashboardData {
   total_collected: number;

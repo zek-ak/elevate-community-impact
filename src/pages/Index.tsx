@@ -6,6 +6,7 @@ import ProgressRing from "@/components/church/ProgressRing";
 import StatsCard from "@/components/church/StatsCard";
 import LeaderboardItem from "@/components/church/LeaderboardItem";
 import Header from "@/components/church/Header";
+import { ChuoKikuuFriendsCard, ImpactCard, CallToActionCard, CurrentProjectsCard } from "@/components/church/ExpandableCard";
 import { usePublicDashboard } from "@/hooks/useChurchData";
 
 const ANNUAL_GOAL = 500000; // Configurable church annual goal
@@ -20,7 +21,12 @@ const CATEGORIES = [
 const Index = () => {
   const { data, isLoading } = usePublicDashboard();
   const [showPicker, setShowPicker] = useState(false);
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const navigate = useNavigate();
+
+  const handleCardToggle = (index: number) => {
+    setExpandedCard(expandedCard === index ? null : index);
+  };
 
   const totalCollected = data?.total_collected ?? 0;
   const percentage = ANNUAL_GOAL > 0 ? (totalCollected / ANNUAL_GOAL) * 100 : 0;
@@ -45,164 +51,160 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden gradient-hero py-16 sm:py-24">
-        <div className="absolute inset-0 opacity-10">
-          {[...Array(5)].map((_, i) => (
+      {/* Right Sidebar - SDA Logo */}
+      <aside className="fixed top-16 right-0 h-[calc(100vh-4rem)] w-16 lg:w-64 bg-church-blue z-40 flex flex-col items-center pt-4 lg:pt-6 pb-4 lg:pb-8 px-2 lg:px-4 shadow-xl">
+        {/* SDA Logo - Rounded */}
+        <div className="w-10 h-10 lg:w-32 lg:h-32 rounded-full bg-white p-1 lg:p-2 shadow-lg mb-2 lg:mb-6">
+          <img 
+            src="/sda_clean_super.png" 
+            alt="SDA Logo" 
+            className="w-full h-full object-contain rounded-full"
+          />
+        </div>
+        
+        {/* Church Name - Hidden on mobile */}
+        <div className="text-center mt-2 lg:mt-4 hidden lg:block">
+          <h3 className="text-white font-display text-xl mb-2">SDA Church</h3>
+          <p className="text-white/60 text-sm">Building God's Kingdom</p>
+        </div>
+
+        {/* Decorative separator - Hidden on mobile */}
+        <div className="w-16 h-0.5 bg-gold mt-6 lg:mt-8 mb-4 lg:mb-6 rounded-full hidden lg:block" />
+
+        {/* Quick Links or Info - Hidden on mobile */}
+        <div className="text-center mt-auto hidden lg:block">
+          <p className="text-white/50 text-xs">© 2026 SDA Church</p>
+        </div>
+      </aside>
+
+      {/* Main Content with right padding for sidebar */}
+      <div className="pr-16 lg:pr-64">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden gradient-hero py-16 sm:py-24">
+        <div className="absolute inset-0 opacity-20">
+          {[...Array(6)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute rounded-full bg-gold"
+              className="absolute rounded-full bg-white/10"
               style={{
-                width: 100 + i * 60,
-                height: 100 + i * 60,
-                top: `${20 + i * 10}%`,
-                left: `${10 + i * 18}%`,
+                width: 80 + i * 50,
+                height: 80 + i * 50,
+                top: `${15 + i * 12}%`,
+                left: `${5 + i * 17}%`,
               }}
-              animate={{ y: [0, -15, 0], opacity: [0.05, 0.15, 0.05] }}
-              transition={{ duration: 4 + i, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ y: [0, -20, 0], opacity: [0.05, 0.12, 0.05] }}
+              transition={{ duration: 5 + i, repeat: Infinity, ease: "easeInOut" }}
             />
           ))}
         </div>
 
-        <motion.div
-          className="container mx-auto px-4 text-center relative z-10"
-          variants={container}
-          initial="hidden"
-          animate="show"
-        >
-          <motion.p variants={item} className="text-gold-light text-sm font-semibold tracking-widest uppercase mb-3">
-            Together We Build
-          </motion.p>
-          <motion.h1 variants={item} className="text-4xl sm:text-5xl lg:text-6xl font-display text-primary-foreground mb-4 leading-tight">
-            Grace Community Church
-          </motion.h1>
-          <motion.p variants={item} className="text-primary-foreground/70 text-lg mb-10 max-w-xl mx-auto">
-            Building God's kingdom through faithful giving, joyful hearts, and united purpose.
-          </motion.p>
-
-          <motion.div variants={item} className="flex justify-center mb-8">
-            <ProgressRing percentage={percentage} size={200} strokeWidth={12} label="Annual Goal" sublabel={`KES ${ANNUAL_GOAL.toLocaleString()}`} />
-          </motion.div>
-
-          <motion.div variants={item} className="flex flex-col items-center gap-2 mb-10">
-            <p className="text-3xl font-bold text-primary-foreground font-body">
-              KES {totalCollected.toLocaleString()}
+        <div className="container mx-auto px-4 relative z-10">
+          {/* Church Name Label - Top Left */}
+          <div className="absolute top-0 left-4 sm:left-8 md:left-12">
+            <p className="text-white/70 text-xs sm:text-sm font-light uppercase tracking-widest">
+              Chuo Kikuu SDA Church
             </p>
-            <p className="text-primary-foreground/60 text-sm">
-              raised of KES {ANNUAL_GOAL.toLocaleString()} goal
-            </p>
-          </motion.div>
+          </div>
 
-          <motion.div variants={item}>
-            <button
-              onClick={() => setShowPicker(true)}
-              className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl gradient-gold text-primary-foreground font-bold text-lg shadow-lg transition-all hover:scale-105 hover:shadow-xl glow-gold"
+          {/* Main Content - Centered */}
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center pt-16">
+            <motion.h1 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-display text-white mb-6 leading-tight"
             >
-              <Heart className="w-5 h-5" />
-              Press Here to Contribute
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </motion.div>
+              Resource Mobilization
+            </motion.h1>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-white/80 text-base sm:text-lg mb-10 max-w-2xl mx-auto leading-relaxed"
+            >
+              Supporting the Mission of Chuo Kikuu SDA Church by strengthening ministry, empowering spiritual growth, and advancing the work of God through unity, generosity, and faithful service.
+            </motion.p>
+
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              onClick={() => setShowPicker(true)}
+              className="group relative inline-flex items-center gap-4 px-10 py-5 rounded-2xl bg-gradient-to-r from-gold via-amber-500 to-gold bg-size-200 animate-gradient font-bold text-lg text-white shadow-2xl hover:shadow-gold/40 transition-all duration-300 hover:bg-position-100 hover:-translate-y-2"
+              style={{
+                backgroundSize: '200% 100%',
+                boxShadow: '0 10px 30px rgba(212, 160, 23, 0.4), 0 0 20px rgba(212, 160, 23, 0.2)',
+              }}
+            >
+              {/* Animated shine effect */}
+              <span className="absolute inset-0 rounded-2xl overflow-hidden">
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              </span>
+              
+              {/* Glow effect behind button */}
+              <span className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-gold opacity-30 blur-lg group-hover:opacity-60 transition-opacity duration-300" />
+              
+              {/* Button content */}
+              <span className="relative flex items-center gap-3">
+                <span className="p-2 rounded-full bg-white/20 backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                  <Heart className="w-6 h-6" />
+                </span>
+                <span className="tracking-wide">Press Here to Contribute</span>
+                <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </motion.button>
+          </div>
+        </div>
+      </section>
+      </div>
+
+      {/* Expandable Cards Section */}
+      <section className="container mx-auto px-4 py-16 pr-16 lg:pr-64">
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          <ChuoKikuuFriendsCard 
+            isExpanded={expandedCard === 0} 
+            onToggle={() => handleCardToggle(0)} 
+            index={0}
+          />
+          <ImpactCard 
+            isExpanded={expandedCard === 1} 
+            onToggle={() => handleCardToggle(1)} 
+            index={1}
+            totalContributed={totalCollected} 
+            activeMembers={activeMembers} 
+          />
+          <CallToActionCard 
+            isExpanded={expandedCard === 2} 
+            onToggle={() => handleCardToggle(2)} 
+            index={2}
+            onContributeClick={() => setShowPicker(true)} 
+          />
+          <CurrentProjectsCard 
+            isExpanded={expandedCard === 3} 
+            onToggle={() => handleCardToggle(3)} 
+            index={3}
+          />
         </motion.div>
       </section>
-
-      {/* Stats Grid */}
-      <section className="container mx-auto px-4 -mt-8 relative z-20">
-        <motion.div className="grid grid-cols-1 sm:grid-cols-3 gap-4" variants={container} initial="hidden" animate="show">
-          <motion.div variants={item}>
-            <StatsCard
-              title="Total Collected"
-              value={`KES ${totalCollected.toLocaleString()}`}
-              subtitle={`${percentage.toFixed(1)}% of annual goal`}
-              icon={<TrendingUp className="w-6 h-6 text-accent" />}
-            />
-          </motion.div>
-          <motion.div variants={item}>
-            <StatsCard
-              title="Best Group"
-              value={bestGroup?.name ?? "—"}
-              subtitle={bestGroup ? `KES ${bestGroup.total.toLocaleString()} • ${bestGroup.members} members` : "No groups yet"}
-              icon={<Trophy className="w-6 h-6 text-primary" />}
-            />
-          </motion.div>
-          <motion.div variants={item}>
-            <StatsCard
-              title="Active Members"
-              value={activeMembers}
-              subtitle="Contributing this year"
-              icon={<Users className="w-6 h-6 text-primary" />}
-            />
-          </motion.div>
-        </motion.div>
-      </section>
-
-      {/* Current Project */}
-      {currentProject && (
-        <section className="container mx-auto px-4 py-16">
-          <motion.div
-            className="glass-card p-6 sm:p-8 rounded-3xl"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
-              <div className="flex-1">
-                <p className="text-xs font-semibold text-accent uppercase tracking-wider mb-1 flex items-center gap-1"><Construction className="w-3.5 h-3.5" /> Current Project</p>
-                <h2 className="text-2xl sm:text-3xl font-display text-foreground mb-2">{currentProject.name}</h2>
-                <p className="text-muted-foreground text-sm mb-4">{currentProject.description}</p>
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="font-bold text-foreground">KES {currentProject.collected_amount.toLocaleString()}</span>
-                  <span className="text-muted-foreground">of KES {currentProject.target_amount.toLocaleString()}</span>
-                </div>
-                <div className="relative h-3 rounded-full bg-muted overflow-hidden mt-3 max-w-md">
-                  <motion.div
-                    className="absolute inset-y-0 left-0 rounded-full gradient-emerald glow-emerald"
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${projectPercentage}%` }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 1.5, ease: "easeOut" }}
-                  />
-                </div>
-              </div>
-              <ProgressRing percentage={projectPercentage} size={120} strokeWidth={8} color="emerald" label="Funded" />
-            </div>
-          </motion.div>
-        </section>
-      )}
-
-      {/* Group Leaderboard Preview */}
-      {groups.length > 0 && (
-        <section className="container mx-auto px-4 pb-16">
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <h2 className="text-2xl font-display text-foreground mb-6 text-center">Group Leaderboard</h2>
-            <div className="max-w-lg mx-auto space-y-3">
-              {groups.slice(0, 5).map((group, i) => (
-                <LeaderboardItem
-                  key={group.id}
-                  rank={i + 1}
-                  name={group.name}
-                  amount={group.total}
-                  memberCount={group.member_count}
-                  isHighlighted={i === 0}
-                />
-              ))}
-            </div>
-          </motion.div>
-        </section>
-      )}
 
       {/* Category Picker Modal */}
       <AnimatePresence>
         {showPicker && (
           <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowPicker(false)}
           >
             <motion.div
-              className="bg-card border border-border rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl"
+              className="bg-white rounded-xl p-6 sm:p-8 w-full max-w-md shadow-2xl border border-slate-200"
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
@@ -226,18 +228,18 @@ const Index = () => {
                         navigate(`/guest-dashboard?category=${cat.id}`);
                       }
                     }}
-                    className="flex items-center gap-4 p-4 rounded-2xl border border-border bg-background hover:border-primary hover:bg-primary/5 transition-all text-left group"
+                    className="flex items-center gap-4 p-4 rounded-lg border border-slate-200 bg-white hover:border-church-blue hover:bg-slate-50 transition-all text-left group"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                      <cat.icon className="w-6 h-6 text-primary" />
+                    <div className="w-12 h-12 rounded-lg bg-church-blue/10 flex items-center justify-center group-hover:bg-church-blue/20 transition-colors">
+                      <cat.icon className="w-6 h-6 text-church-blue" />
                     </div>
                     <div>
                       <p className="font-semibold text-foreground">{cat.label}</p>
                       <p className="text-xs text-muted-foreground">{cat.description}</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-muted-foreground ml-auto group-hover:text-primary transition-colors" />
+                    <ArrowRight className="w-4 h-4 text-muted-foreground ml-auto group-hover:text-church-blue transition-colors" />
                   </motion.button>
                 ))}
               </div>
@@ -247,11 +249,14 @@ const Index = () => {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer className="border-t border-border py-8">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            © 2026 Grace Community Church. Built with <Heart className="w-3.5 h-3.5 inline text-primary" /> and faith.
-          </p>
+      <footer className="bg-church-blue border-t border-church-blue-dark py-8 pr-16 lg:pr-64">
+        <div className="container mx-auto px-4">
+          <div className="text-center">
+            <h3 className="text-white font-display text-lg mb-2">Seventh Day Adventist Church CHUO KIKUU</h3>
+            <p className="text-white/70 text-sm">
+              © Copyright @2026 by CHUO KIKUU SDA
+            </p>
+          </div>
         </div>
       </footer>
     </div>

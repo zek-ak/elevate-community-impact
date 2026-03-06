@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 import Header from "@/components/church/Header";
 import { useQuery } from "@tanstack/react-query";
 import { Users, TrendingUp, Target, Loader2, Trophy, Medal, Award, Flame } from "lucide-react";

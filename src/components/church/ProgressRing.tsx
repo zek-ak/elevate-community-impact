@@ -6,13 +6,14 @@ interface ProgressRingProps {
   strokeWidth?: number;
   label?: string;
   sublabel?: string;
-  color?: "gold" | "emerald" | "xp";
+  color?: "gold" | "emerald" | "xp" | "church-blue";
 }
 
 const colorMap = {
-  gold: { stroke: "hsl(36, 90%, 50%)", glow: "hsl(36, 90%, 50%)" },
+  gold: { stroke: "hsl(42, 55%, 52%)", glow: "hsl(42, 55%, 52%)" },
   emerald: { stroke: "hsl(155, 60%, 40%)", glow: "hsl(155, 60%, 40%)" },
   xp: { stroke: "hsl(270, 60%, 55%)", glow: "hsl(270, 60%, 55%)" },
+  "church-blue": { stroke: "hsl(217, 54%, 27%)", glow: "hsl(217, 54%, 27%)" },
 };
 
 const ProgressRing = ({ percentage, size = 160, strokeWidth = 10, label, sublabel, color = "gold" }: ProgressRingProps) => {

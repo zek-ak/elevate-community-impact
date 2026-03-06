@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-import type { Tables } from "@/integrations/supabase/types";
+import { supabase } from "@/lib/supabase";
+import type { Tables } from "@/types/supabase";
 
 type Profile = Tables<"profiles">;
 type AppRole = "super_admin" | "finance_admin" | "group_leader" | "member";
