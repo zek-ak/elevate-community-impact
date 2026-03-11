@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import Header from "@/components/church/Header";
 import { useQuery } from "@tanstack/react-query";
-import { Users, TrendingUp, Target, Loader2, Trophy, Medal, Award, Flame } from "lucide-react";
+import { Users, TrendingUp, Target, Loader2 } from "lucide-react";
 import StatsCard from "@/components/church/StatsCard";
 import ProgressRing from "@/components/church/ProgressRing";
 import { useEffect } from "react";
@@ -76,51 +76,13 @@ const GroupLeaderDashboard = () => {
           <ProgressRing percentage={groupPct} size={140} strokeWidth={10} label="Group Progress" />
           <div className="flex-1 grid grid-cols-2 gap-3 w-full">
             <StatsCard title="Members" value={members.length} icon={<Users className="w-5 h-5 text-primary" />} />
-            <StatsCard title="Contributed" value={`KES ${totalContributed.toLocaleString()}`} icon={<TrendingUp className="w-5 h-5 text-accent" />} />
-            <StatsCard title="Group Goal" value={`KES ${totalGoal.toLocaleString()}`} icon={<Target className="w-5 h-5 text-primary" />} />
+            <StatsCard title="Contributed" value={`TZS ${totalContributed.toLocaleString()}`} icon={<TrendingUp className="w-5 h-5 text-accent" />} />
+            <StatsCard title="Group Goal" value={`TZS ${totalGoal.toLocaleString()}`} icon={<Target className="w-5 h-5 text-primary" />} />
             <StatsCard title="Avg Progress" value={`${groupPct.toFixed(0)}%`} icon={<Trophy className="w-5 h-5 text-primary" />} />
           </div>
         </motion.div>
 
-        {/* Member Leaderboard */}
-        <motion.div variants={item}>
-          <h2 className="text-xl font-display text-foreground mb-4 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-primary" /> Member Leaderboard
-          </h2>
-          <div className="space-y-2">
-            {members.map((m, i) => {
-              const pct = Number(m.annual_goal) > 0 ? Math.round((Number(m.total_contributed) / Number(m.annual_goal)) * 100) : 0;
-              const RankIcon = i === 0 ? Trophy : i === 1 ? Medal : i === 2 ? Award : null;
-              return (
-                <motion.div
-                  key={m.id}
-                  className={`glass-card flex items-center gap-4 p-4 rounded-xl ${i === 0 ? "border-primary/30 border-2" : ""}`}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                >
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold">
-                    {RankIcon ? <RankIcon className="w-4 h-4 text-primary" /> : i + 1}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm truncate">{m.full_name}</p>
-                    <p className="text-xs text-muted-foreground">{m.category.replace("_", " ")} • Level {m.level} • <Flame className="w-3 h-3 inline" /> {m.streak}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                        <motion.div className="h-full rounded-full gradient-gold" initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1 }} />
-                      </div>
-                      <span className="text-xs text-muted-foreground">{pct}%</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-foreground">KES {Number(m.total_contributed).toLocaleString()}</p>
-                    <p className="text-[10px] text-muted-foreground">of {Number(m.annual_goal).toLocaleString()}</p>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-        </motion.div>
+
       </motion.div>
     </div>
   );

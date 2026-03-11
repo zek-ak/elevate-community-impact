@@ -1,69 +1,61 @@
-# Home Page Styling Update Plan
+# Church Resource Mobilization Dashboard - Refactoring Plan
 
-## Objective
-Update the home page visual design to match a classic church aesthetic with navy blue tones while preserving navigation structure and functionality.
+## Status: COMPLETED ✅
 
 ## Information Gathered
-- **Current Design**: Uses gold/emerald accents with warm cream background
-- **Project Setup**: React + TypeScript + Tailwind CSS + Framer Motion
-- **Target Design**: Traditional church blue (#1a365d) with clean, classic styling
-- **Files to modify**: 
-  - tailwind.config.ts (color system)
-  - src/index.css (CSS variables)
-  - src/pages/Index.tsx (main page styling)
-  - src/components/church/Header.tsx (styling only, not structure)
-  - src/components/church/StatsCard.tsx
-  - src/components/church/LeaderboardItem.tsx
-  - src/components/church/ProgressRing.tsx
+- **Current Dashboard**: `src/pages/Dashboard.tsx` - Multi-page style with navigation
+- **GuestDashboard**: `src/pages/GuestDashboard.tsx` - Payment form to be reused
+- **Database**: Supabase with tables: profiles, contributions, groups, projects, badges, user_badges, user_roles
+- **Currency**: TZS (Tanzanian Shillings) - consistent with latest requirements
+- **Auth**: Uses AuthContext with simulated mode support
 
-## Color System (Church Blue Theme)
-- Primary: Deep Navy Blue (#1a365d)
-- Primary Light: #2c5282
-- Primary Dark: #1a202c
-- Secondary: Warm Cream (#f7f5f0)
-- Accent: Gold (#c6a052)
-- Background: Off-white (#fafafa)
-- Card Background: White (#ffffff)
-- Text: Dark Gray (#2d3748)
+## Completed Steps
+### Step 1: Create Database Migration ✅
+- Created `supabase/migrations/refactor_dashboard.sql` with pledges table
 
-## Plan
+### Step 2: Create New Dashboard Components ✅
+- Created `src/components/dashboard/` directory with:
+  - `ChurchSummaryCard.tsx` - Main banking-style balance card
+  - (removed) `StatsGrid.tsx` - small stats cards replaced with slideshow
+  - `ActionButtonsGrid.tsx` - Square action buttons (mobile banking style)
+  - `ExpandablePanel.tsx` - Reusable expandable section component
+  - `PledgeGoalForm.tsx` - Pledge goal form with year selection
 
-### Step 1: Update tailwind.config.ts
-- Add church-blue color palette
-- Keep existing font configuration (DM Serif Display + Plus Jakarta Sans)
+### Step 3: Refactor Dashboard.tsx ✅
+- Replaced entire content with single-page mobile banking layout:
+  1. Top Header (user greeting, avatar, notification)
+  2. Church Summary Card (annual goal, collected, progress)
+  3. Statistics Cards Grid (4 cards)
+  4. Action Buttons Grid (6 buttons)
+  5. Expandable Panels (instead of pages):
+     - Pledge Goal Form
+     - Contributions List
+     - Guest Payment Form (reused inline)
+     - Group Members
+     - Projects
+     - Reports
 
-### Step 2: Update src/index.css
-- Replace CSS variables with church blue theme
-- Update gradient and shadow definitions
-- Keep animation utilities
+### Step 4: UI Enhancements ✅
+- Smooth animations using framer-motion
+- Mobile-first responsive layout
+- Banking-style visual design with gradient cards
 
-### Step 3: Update src/components/church/Header.tsx
-- Apply church blue styling to header
-- Keep exact navigation structure unchanged
+## Files Created/Modified
+1. `src/pages/Dashboard.tsx` - Main refactoring target (REFACTORED)
+2. New: `src/components/dashboard/ChurchSummaryCard.tsx` (CREATED)
+3. New: `src/components/dashboard/StatsGrid.tsx` (CREATED)
+4. New: `src/components/dashboard/ActionButtonsGrid.tsx` (CREATED)
+5. New: `src/components/dashboard/ExpandablePanel.tsx` (CREATED)
+6. New: `src/components/dashboard/PledgeGoalForm.tsx` (CREATED)
+7. New: `supabase/migrations/refactor_dashboard.sql` (CREATED)
 
-### Step 4: Update src/pages/Index.tsx
-- Hero section: Deep blue gradient background
-- Stats cards: White cards with subtle shadows
-- Progress rings: Church blue color
-- Buttons: Blue with gold hover accent
-- Footer: Simple church-style footer
+## Build Status
+✅ Build successful - no errors
 
-### Step 5: Update StatsCard, LeaderboardItem, ProgressRing
-- Apply consistent card styling
-- Subtle shadows, rounded corners
-- Hover animations
-
-### Step 6: Test and verify
-- Ensure responsiveness
-- Verify no breaking changes
-- Check mobile layout
-
-## Dependent Files to Edit
-- tailwind.config.ts
-- src/index.css
-- src/pages/Index.tsx
-- src/components/church/Header.tsx
-- src/components/church/StatsCard.tsx
-- src/components/church/LeaderboardItem.tsx
-- src/components/church/ProgressRing.tsx
+## Additional Fix Applied
+- Updated `src/App.tsx` with route protection:
+  - ProtectedRoute wrapper: redirects unauthenticated users to homepage
+  - AuthPage wrapper: redirects already logged-in users from /auth to /dashboard
+  - Added loading spinners for both routes while auth is being checked
+- This ensures users signing in via Index dropdown are redirected to dashboard instead of seeing auth page
 

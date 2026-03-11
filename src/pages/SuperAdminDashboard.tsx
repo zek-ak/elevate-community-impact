@@ -179,7 +179,7 @@ const SuperAdminDashboard = () => {
         <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <StatsCard title="Total Members" value={profiles.length} icon={<Users className="w-5 h-5 text-primary" />} />
           <StatsCard title="Active Members" value={activeMembers} icon={<UserCheck className="w-5 h-5 text-accent" />} />
-          <StatsCard title="Total Collected" value={`KES ${totalCollected.toLocaleString()}`} icon={<TrendingUp className="w-5 h-5 text-accent" />} />
+          <StatsCard title="Total Collected" value={`TZS ${totalCollected.toLocaleString()}`} icon={<TrendingUp className="w-5 h-5 text-accent" />} />
           <StatsCard title="Groups" value={groups.length} icon={<FolderKanban className="w-5 h-5 text-primary" />} />
         </motion.div>
 
@@ -211,7 +211,7 @@ const SuperAdminDashboard = () => {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold text-foreground">KES {Number(p.total_contributed).toLocaleString()}</p>
+                      <p className="text-sm font-bold text-foreground">TZS {Number(p.total_contributed).toLocaleString()}</p>
                       <p className="text-xs text-muted-foreground">of {Number(p.annual_goal).toLocaleString()}</p>
                     </div>
                     <Dialog>
@@ -235,7 +235,7 @@ const SuperAdminDashboard = () => {
                         </DialogHeader>
                         <div className="space-y-4 pt-2">
                           <div>
-                            <label className="text-sm text-muted-foreground">Annual Goal (KES)</label>
+                            <label className="text-sm text-muted-foreground">Annual Goal (TZS)</label>
                             <Input type="number" value={editGoal} onChange={e => setEditGoal(e.target.value)} />
                           </div>
                           <div>
@@ -316,7 +316,7 @@ const SuperAdminDashboard = () => {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-foreground">{g.name}</p>
-                      <p className="text-xs text-muted-foreground">{memberCount} members • KES {groupTotal.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">{memberCount} members • TZS {groupTotal.toLocaleString()}</p>
                     </div>
                     <button onClick={() => handleDeleteGroup(g.id)} className="p-2 rounded-lg hover:bg-destructive/10 transition-colors">
                       <Trash2 className="w-4 h-4 text-destructive" />
@@ -331,7 +331,7 @@ const SuperAdminDashboard = () => {
               <div className="glass-card p-4 rounded-xl space-y-3">
                 <p className="font-semibold text-foreground text-sm">Create New Project</p>
                 <Input placeholder="Project name" value={newProjectName} onChange={e => setNewProjectName(e.target.value)} />
-                <Input placeholder="Target amount (KES)" type="number" value={newProjectTarget} onChange={e => setNewProjectTarget(e.target.value)} />
+                <Input placeholder="Target amount (TZS)" type="number" value={newProjectTarget} onChange={e => setNewProjectTarget(e.target.value)} />
                 <Input placeholder="Description (optional)" value={newProjectDesc} onChange={e => setNewProjectDesc(e.target.value)} />
                 <motion.button
                   onClick={handleAddProject}
@@ -354,7 +354,7 @@ const SuperAdminDashboard = () => {
                     </div>
                     {p.description && <p className="text-xs text-muted-foreground mb-2">{p.description}</p>}
                     <div className="flex items-center gap-2 text-sm">
-                      <span className="font-bold text-foreground">KES {Number(p.collected_amount).toLocaleString()}</span>
+                      <span className="font-bold text-foreground">TZS {Number(p.collected_amount).toLocaleString()}</span>
                       <span className="text-muted-foreground">/ {Number(p.target_amount).toLocaleString()}</span>
                       <span className="text-xs text-primary font-medium ml-auto">{pct.toFixed(0)}%</span>
                     </div>
@@ -376,7 +376,7 @@ const SuperAdminDashboard = () => {
                   {contributions.map(c => (
                     <div key={c.id} className="glass-card p-3 rounded-xl flex items-center justify-between">
                       <div>
-                        <p className="font-semibold text-foreground text-sm">KES {Number(c.amount).toLocaleString()}</p>
+                        <p className="font-semibold text-foreground text-sm">TZS {Number(c.amount).toLocaleString()}</p>
                         <p className="text-xs text-muted-foreground">{(c as any).projects?.name ?? "General Fund"} • {c.method}</p>
                       </div>
                       <p className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString()}</p>

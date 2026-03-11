@@ -111,7 +111,7 @@ const FinanceAdminDashboard = () => {
 
         <motion.div variants={item} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <StatsCard title="Total Contributions" value={contributions.length} icon={<Receipt className="w-5 h-5 text-primary" />} />
-          <StatsCard title="Amount Collected" value={`KES ${totalCollected.toLocaleString()}`} icon={<TrendingUp className="w-5 h-5 text-accent" />} />
+          <StatsCard title="Amount Collected" value={`TZS ${totalCollected.toLocaleString()}`} icon={<TrendingUp className="w-5 h-5 text-accent" />} />
           <StatsCard title="Active Projects" value={projects.filter(p => p.status === "ongoing").length} icon={<FileText className="w-5 h-5 text-primary" />} />
         </motion.div>
 
@@ -135,7 +135,7 @@ const FinanceAdminDashboard = () => {
                   </Select>
                 </div>
                 <div>
-                  <label className="text-sm text-muted-foreground">Amount (KES)</label>
+                  <label className="text-sm text-muted-foreground">Amount (TZS)</label>
                   <Input type="number" value={payAmount} onChange={e => setPayAmount(e.target.value)} placeholder="e.g. 5000" />
                 </div>
                 <div>
@@ -179,7 +179,7 @@ const FinanceAdminDashboard = () => {
               ) : contributions.map(c => (
                 <div key={c.id} className="glass-card p-3 rounded-xl flex items-center justify-between">
                   <div>
-                    <p className="font-semibold text-foreground text-sm">KES {Number(c.amount).toLocaleString()}</p>
+                    <p className="font-semibold text-foreground text-sm">TZS {Number(c.amount).toLocaleString()}</p>
                     <p className="text-xs text-muted-foreground">
                       {(c as any).projects?.name ?? "General Fund"} • {c.method}
                       {c.recorded_by ? " • Manual entry" : ""}

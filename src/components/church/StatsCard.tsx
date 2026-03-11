@@ -19,10 +19,10 @@ const variantStyles = {
 const StatsCard = ({ title, value, subtitle, icon, variant = "default" }: StatsCardProps) => {
   return (
     <motion.div
-      className={`p-5 rounded-lg ${variantStyles[variant]} ${variant === "default" ? "" : ""}`}
+      className={`p-5 rounded-lg ${variantStyles[variant]} ${variant === "default" ? "shadow-neu" : ""}`}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -3, transition: { duration: 0.2 } }}
+      whileHover={{ y: -3, scale: 1.03, transition: { duration: 0.2 } }}
       style={variant === "default" ? { boxShadow: "var(--shadow-card)" } : undefined}
     >
       <div className="flex items-start justify-between">

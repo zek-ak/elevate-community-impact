@@ -1,3 +1,4 @@
+<parameter name="content">
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -7,14 +8,12 @@ import { useMemberDashboard, usePublicDashboard } from "@/hooks/useChurchData";
 import { supabase } from "@/lib/supabase";
 import { MOCK_CHURCH, MOCK_GROUPS, LEVELS } from "@/lib/mockData";
 import Header from "@/components/church/Header";
-import { cn } from "@/lib/utils";
 
-// Dashboard Components
-import OverviewCard from "@/components/dashboard/OverviewCard";
-import ActionButtonsGrid, { actions } from "@/components/dashboard/ActionButtonsGrid";
+import ChurchSummaryCard from "@/components/dashboard/ChurchSummaryCard";
+import StatsGrid from "@/components/dashboard/StatsGrid";
+import ActionButtonsGrid from "@/components/dashboard/ActionButtonsGrid";
 import PledgeGoalForm from "@/components/dashboard/PledgeGoalForm";
 
-// Icons
 import { 
   Wallet, 
   Target, 
@@ -60,7 +59,6 @@ const MOCK_PROFILE = {
   updated_at: new Date().toISOString(),
 };
 
-// Full Payment Form (from GuestDashboard)
 const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: boolean }) => {
   const [paymentType, setPaymentType] = useState<"mobile_money" | "bank_transfer">("mobile_money");
   const [phone, setPhone] = useState("");
@@ -85,6 +83,8 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
     { id: "nbc", name: "NBC Bank", accountNumber: "XXXXXXXXXXXX" },
   ];
 
+  const numericAmount = parseInt(amount || "0", 10);
+
   const formatPhoneNumber = (value: string): string => {
     const digits = value.replace(/\D/g, "").slice(0, 12);
     if (digits.length <= 3) return digits;
@@ -96,8 +96,8 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
   const formatCurrency = (amt: number): string => amt.toLocaleString("en-TZ");
 
   const handleSubmit = async () => {
-    const numericAmount = parseInt(amount, 10);
-    if (!numericAmount || numericAmount <= 0) {
+    const numAmount = parseInt(amount, 10);
+    if (!numAmount || numAmount <= 0) {
       toast.error("Please enter a valid amount");
       return;
     }
@@ -135,7 +135,7 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
       if (!isSimulated && userId) {
         await supabase.from("contributions").insert({
           user_id: userId,
-          amount: numericAmount,
+          amount: numAmount,
           method: paymentType === "mobile_money" ? "mobile_money" : "bank_transfer",
         });
       }
@@ -170,12 +170,11 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
             : "Please use the bank details below to make your transfer."}
         </p>
         <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 mb-6 text-left border border-white/10">
-            <div className="flex justify-between py-2 border-b border-white/10">
-              <span className="text-white/60">Amount</span>
-              <span className="font-semibold text-gold-light text-lg">
-                TZS {formatCurrency(parseInt(amount, 10) || 0)}
-              </span>
-            </div>
+          <div className="flex justify-between py-2 border-b border-white/10">
+            <span className="text-white/60">Amount</span>
+            <span className="font-semibold text-gold-light text-lg">
+              TZS {formatCurrency(numericAmount)}
+            </span>
           </div>
         <motion.button
           onClick={() => { setPaymentState("form"); setAmount(""); setPhone(""); setReference(""); }}
@@ -191,7 +190,6 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
 
   return (
     <div className="space-y-4">
-      {/* Payment Type Tabs */}
       <div className="flex rounded-xl bg-white/10 p-1 border border-white/10">
         <button
           type="button"
@@ -217,7 +215,6 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
         </button>
       </div>
 
-      {/* Mobile Money Fields */}
       {paymentType === "mobile_money" && (
         <div className="space-y-3">
           <div className="space-y-1">
@@ -264,11 +261,9 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
                 </button>
               ))}
             </div>
-          </div>
         </div>
       )}
 
-      {/* Bank Transfer Fields */}
       {paymentType === "bank_transfer" && (
         <div className="space-y-3">
           <div className="space-y-2">
@@ -295,7 +290,6 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
                 </button>
               ))}
             </div>
-          </div>
           <div className="space-y-1">
             <label className="text-sm font-semibold text-white">Account Number</label>
             <input
@@ -306,10 +300,8 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
               className="w-full h-11 px-4 rounded-xl border-2 bg-white/95 text-base font-medium focus:outline-none focus:ring-2 focus:ring-white/20 border-border/50 focus:border-gold"
             />
           </div>
-        </div>
       )}
 
-      {/* Amount Input */}
       <div className="space-y-1">
         <label className="text-sm font-semibold text-white">Amount (TZS)</label>
         <div className="relative">
@@ -322,9 +314,7 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
             className="w-full h-11 pl-16 pr-4 rounded-xl border-2 bg-white/95 text-base font-medium focus:outline-none focus:ring-2 focus:ring-white/20 border-border/50 focus:border-gold"
           />
         </div>
-      </div>
 
-      {/* Submit Button */}
       <motion.button
         type="button"
         onClick={handleSubmit}
@@ -386,10 +376,9 @@ const ContributionsList = ({ contributions }: { contributions: any[] }) => {
                 {(contribution as any).projects?.name || "General Fund"} • {contribution.method || "Demo"}
               </p>
             </div>
-            <p className="text-sm text-white/50">
-              {contribution.created_at ? new Date(contribution.created_at).toLocaleDateString() : "Today"}
-            </p>
-          </div>
+          <p className="text-sm text-white/50">
+            {contribution.created_at ? new Date(contribution.created_at).toLocaleDateString() : "Today"}
+          </p>
         </motion.div>
       ))}
     </div>
@@ -439,7 +428,6 @@ const GroupMembersList = ({ members, groupName }: { members: any[]; groupName: s
                   transition={{ duration: 0.8 }}
                 />
               </div>
-            </div>
           </motion.div>
         );
       })}
@@ -498,7 +486,6 @@ const ProjectsList = ({ projects }: { projects: any[] }) => {
                 <span>TZS {project.collected_amount?.toLocaleString() || 0}</span>
                 <span>TZS {project.target_amount?.toLocaleString() || 0}</span>
               </div>
-            </div>
           </motion.div>
         );
       })}
@@ -652,7 +639,6 @@ const Dashboard = () => {
                 {profile?.category?.replace("_", " ") || "Church Member"}
               </p>
             </div>
-          </div>
           <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center relative">
             <Bell className="w-5 h-5 text-muted-foreground" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
@@ -660,14 +646,22 @@ const Dashboard = () => {
         </motion.div>
 
         <motion.div variants={item}>
-          <OverviewCard
-            churchGoal={churchGoal}
-            churchCollected={churchCollected}
-            bestGroup={(bestGroup as any) ? {
-              name: (bestGroup as any).name || "Unknown Group",
-              total: (bestGroup as any).total || (bestGroup as any).totalContributed || 0,
+          <ChurchSummaryCard
+            annualGoal={churchGoal}
+            totalCollected={churchCollected}
+            currency="KES"
+          />
+        </motion.div>
+
+        <motion.div variants={item}>
+          <StatsGrid
+            bestGroup={(bestGroup as any) ? { 
+              name: (bestGroup as any).name || "Unknown Group", 
+              total: (bestGroup as any).total || (bestGroup as any).totalContributed || 0 
             } : null}
+            myContribution={profile?.total_contributed || 0}
             myRemainingGoal={Math.max(0, balance || 0)}
+            groupProgress={groupProgress}
           />
         </motion.div>
 
@@ -675,50 +669,14 @@ const Dashboard = () => {
           <ActionButtonsGrid
             onAction={handleAction}
             activeAction={activePanel}
+            dropdownContent={getDropdownContent()}
             onCloseDropdown={closeDropdown}
           />
         </motion.div>
-
-        {/* modal overlay for selected action */}
-        <AnimatePresence>
-          {activePanel && getDropdownContent() && (
-            <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6, ease: 'easeInOut' }}
-              onClick={closeDropdown}
-            >
-              <motion.div
-                className="relative w-[90vw] sm:w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                transition={{ duration: 0.6, ease: 'easeInOut' }}
-                onClick={(e) => e.stopPropagation()}
-                style={{ background: "linear-gradient(135deg, #1e3a5f 0%, #0f2744 50%, #1a3a5c 100%)" }}
-              >
-                <div className="p-4">
-                  {actions.find(a => a.id === activePanel) && (
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", actions.find(a => a.id === activePanel)!.color)}>
-                        {actions.find(a => a.id === activePanel)!.icon}
-                      </div>
-                      <span className="font-medium text-white text-lg">
-                        {actions.find(a => a.id === activePanel)!.label}
-                      </span>
-                    </div>
-                  )}
-                  {getDropdownContent()}
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </motion.div>
     </div>
   );
 };
 
 export default Dashboard;
+</parameter>

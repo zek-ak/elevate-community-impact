@@ -154,11 +154,20 @@
   }
   /* Church-style card with subtle border */
   .church-card {
-    @apply bg-white rounded-lg border border-slate-200 transition-all duration-300;
+    @apply bg-white rounded-lg transition-all duration-300;
+    /* neumorphic shadows */
+    box-shadow: 8px 8px 15px rgba(0,0,0,0.1), -8px -8px 15px rgba(255,255,255,0.7);
   }
   .church-card:hover {
-    box-shadow: var(--shadow-card-hover);
-    transform: translateY(-2px);
+    box-shadow: 4px 4px 10px rgba(0,0,0,0.15), -4px -4px 10px rgba(255,255,255,0.85);
+    transform: translateY(-2px) scale(1.02);
+  }
+  /* custom neumorphic shadow utilities */
+  .shadow-neu {
+    box-shadow: 8px 8px 15px rgba(0,0,0,0.1), -8px -8px 15px rgba(255,255,255,0.7);
+  }
+  .shadow-neu-hover {
+    box-shadow: 4x 4px 10px rgba(0,0,0,0.15), -4px -4px 10px rgba(255,255,255,0.85);
   }
   /* Church-style button */
   .btn-church {
