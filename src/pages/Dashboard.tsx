@@ -347,9 +347,7 @@ const PaymentForm = ({ userId, isSimulated }: { userId?: string; isSimulated: bo
         )}
       </motion.button>
 
-      {isSimulated && (
-        <p className="text-xs text-center text-white/40">Running in demo mode</p>
-      )}
+
     </div>
   );
 };
@@ -545,10 +543,10 @@ const Dashboard = () => {
   const [activePanel, setActivePanel] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authLoading && !user && !isSimulated) {
+    if (!authLoading && !user) {
       navigate("/auth");
     }
-  }, [authLoading, user, isSimulated, navigate]);
+  }, [authLoading, user, navigate]);
 
   const queryUserId = isSimulated ? undefined : user?.id;
   const { profileQuery, contributionsQuery, groupMembersQuery } = useMemberDashboard(queryUserId);
@@ -562,7 +560,7 @@ const Dashboard = () => {
     );
   }
 
-  const profile = isSimulated ? MOCK_PROFILE : (authProfile || profileQuery.data);
+  const profile = authProfile || profileQuery.data;
   const contributions = isSimulated ? [] : (contributionsQuery.data ?? []);
   const groupMembers = isSimulated ? [] : (groupMembersQuery.data ?? []);
 
@@ -590,11 +588,11 @@ const Dashboard = () => {
       case "contribute":
         return (
           <div className="rounded-2xl p-4" style={{ background: "linear-gradient(135deg, #1e3a5f 0%, #0f2744 50%, #1a3a5c 100%)" }}>
-            <PaymentForm userId={user?.id} isSimulated={isSimulated} />
+            <PaymentForm userId={user?.id} />
           </div>
         );
       case "pledge":
-        return <PledgeGoalForm userId={user?.id} isSimulated={isSimulated} />;
+        return <PledgeGoalForm userId={user?.id} />;
       case "my-contributions":
         return (
           <div className="rounded-2xl p-4" style={{ background: "linear-gradient(135deg, #1e3a5f 0%, #0f2744 50%, #1a3a5c 100%)" }}>

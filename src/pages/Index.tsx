@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { ChuoKikuuFriendsCard, ImpactCard, CallToActionCard, CurrentProjectsCard } from "@/components/church/ExpandableCard";
 import { usePublicDashboard } from "@/hooks/useChurchData";
-import { otpService } from "@/lib/otpService";
+import { otpService } from "@/lib/otpService"; // used for SMS-based OTP flows
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -31,7 +31,7 @@ const Index = () => {
   const [authDropdown, setAuthDropdown] = useState<"signin" | "signup" | null>(null);
   const [selectedGuestCategory, setSelectedGuestCategory] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { refreshProfile, signInSimulated } = useAuth();
+  const { refreshProfile } = useAuth();
 
   // Hero slideshow state
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -102,17 +102,17 @@ const Index = () => {
       toast.error("Please enter a valid phone number");
       return;
     }
+
     setAuthLoading(true);
     try {
-      const result = await otpService.generateOTP(phone, fullName.trim());
+      const result = await otpService.generateOTP(phone, fullName);
       if (result.success) {
-        setGeneratedOTP(result.otp || "");
         setAuthStep("otp");
         setOtpCountdown(300);
+        toast.success("Verification code sent to your phone!");
         startCountdown();
-        toast.success(`Verification code: ${result.otp}`);
       } else {
-        toast.error(result.error || "Failed to generate code");
+        toast.error(result.error || "Failed to send code");
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -129,13 +129,14 @@ const Index = () => {
     }
     setAuthLoading(true);
     try {
-      const result = await otpService.loginWithPhone(phone);
-      if (result.success && result.session_token) {
-        await signInSimulated(result.user, result.session_token);
-        toast.success("Welcome back!");
-        navigate("/dashboard", { replace: true });
+      const result = await otpService.generateOTP(phone);
+      if (result.success) {
+        setAuthStep("otp");
+        setOtpCountdown(300);
+        startCountdown();
+        toast.success("Verification code sent to your phone!");
       } else {
-        toast.error(result.error || "User not found. Please sign up first.");
+        toast.error(result.error || "Failed to send code");
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -144,28 +145,34 @@ const Index = () => {
     }
   };
 
+  // called when we are on the OTP verification step
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!otp || otp.length !== 6) {
-      toast.error("Please enter the 6-digit code");
+    if (otp.length !== 6) {
+      toast.error("Enter the 6‑digit code");
       return;
     }
+
     setAuthLoading(true);
     try {
       const result = await otpService.verifyOTP(phone, otp);
-      if (result.success && result.session_token) {
-        await signInSimulated(result.user, result.session_token);
-        toast.success("Account created! Welcome!");
-        navigate("/dashboard", { replace: true });
+      if (result.success) {
+        toast.success("Authenticated successfully!");
+        // refresh auth context profile and close dropdown
+        await refreshProfile();
+        setAuthDropdown(null);
+        resetAuthForm();
       } else {
-        toast.error(result.error || "Invalid code. Please try again.");
+        toast.error(result.error || "Invalid or expired code");
       }
     } catch (error) {
-      toast.error("An error occurred. Please try again.");
+      toast.error("An error occurred during verification.");
     } finally {
       setAuthLoading(false);
     }
   };
+
+  // Auth handlers use Supabase - otpService.verifyOTP now works with Supabase
 
   const startCountdown = () => {
     const countdown = setInterval(() => {
@@ -183,12 +190,11 @@ const Index = () => {
     if (otpCountdown > 0) return;
     setAuthLoading(true);
     try {
-      const result = await otpService.generateOTP(phone, fullName.trim());
+      const result = await otpService.generateOTP(phone);
       if (result.success) {
-        setGeneratedOTP(result.otp || "");
         setOtp("");
         setOtpCountdown(300);
-        toast.success(`New code: ${result.otp}`);
+        toast.success("New code sent!");
         startCountdown();
       } else {
         toast.error(result.error || "Failed to resend");
@@ -1160,7 +1166,7 @@ const Index = () => {
           <div className="text-center">
             <h3 className="text-white font-display text-lg mb-2">Seventh Day Adventist Church CHUO KIKUU</h3>
             <p className="text-white/70 text-sm">
-              © Copyright @2026 by CHUO KIKUU SDA
+              © Copyright @2026 CHUO KIKUU SDA CHURCH
             </p>
           </div>
         </div>

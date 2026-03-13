@@ -1,43 +1,17 @@
-
 import { supabase } from "./supabase";
 
 export interface OTPResponse {
   success: boolean;
-  otp?: string;
-  expires_at?: string;
-  phone?: string;
+  message?: string;
   error?: string;
 }
 
 export interface VerifyResponse {
   success: boolean;
-  session_token?: string;
-  user_id?: string;
-  user?: {
-    id: string;
-    full_name: string;
-    phone: string;
-    category: string;
-  };
-  expires_at?: string;
-  error?: string;
-}
-
-export interface SessionValidation {
-  valid: boolean;
-  user_id?: string;
-  user?: {
-    id: string;
-    full_name: string;
-    phone: string;
-    category: string;
-  };
-  expires_at?: string;
-  error?: string;
-}
-
-export interface LoginResponse {
-  success: boolean;
+  // tokens returned from server; access_token is the Supabase session token
+  access_token?: string;
+  refresh_token?: string;
+  // legacy field (some older code might still reference it)
   session_token?: string;
   user_id?: string;
   user?: {
@@ -51,214 +25,103 @@ export interface LoginResponse {
 }
 
 class OTPService {
-  /**
-   * Generate internal OTP for signup verification
-   */
-  async generateOTP(phone: string, fullName?: string): Promise<OTPResponse> {
-    try {
-      const { data, error } = await supabase.rpc("generate_otp", {
-        _phone: phone,
-        _full_name: fullName || null,
-      });
+  private supabaseUrl: string = 'https://lyriycokryccjrhuqqmj.supabase.co';
 
-      if (error) {
-        console.error("OTP generation error:", error);
-        return { success: false, error: error.message };
+  async generateOTP(phone: string, fullName?: string): Promise<OTPResponse> {
+    // Format phone to +255XXXXXXXXX
+    let normalized = phone.replace(/\D/g, '');
+    if (normalized.startsWith('0')) normalized = '255' + normalized.slice(1);
+    if (!normalized.startsWith('255')) normalized = '255' + normalized; // fallback
+    normalized = '+' + normalized;
+
+    console.log('generateOTP called with', normalized, fullName);
+
+    try {
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!anonKey) {
+        console.error('VITE_SUPABASE_ANON_KEY is missing');
+        return { success: false, error: 'Configuration error: missing Supabase anon key' };
       }
 
-      return data as OTPResponse;
+      const response = await fetch(`${this.supabaseUrl}/functions/v1/send-sms-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${anonKey}`,
+        },
+        body: JSON.stringify({ phone: normalized, full_name: fullName }),
+      });
+
+      const data = await response.json();
+      console.log('send-sms-otp response', response.status, data);
+      if (!response.ok) {
+        // include status/code so caller can see what went wrong
+        const errMsg = data.error || `HTTP ${response.status} ${response.statusText}`;
+        console.warn('generateOTP failed with', response.status, data);
+        if (response.status === 401) {
+          return { success: false, error: 'Unauthorized (401) - check Supabase anon key in env' };
+        }
+        return { success: false, error: errMsg };
+      }
+      return { success: true, message: data.message };
     } catch (error) {
-      console.error("OTP generation error:", error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Failed to generate OTP" 
+      console.error('OTP generation error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to send OTP',
       };
     }
   }
 
-  /**
-   * Verify the OTP code and create a session (for signup)
-   */
   async verifyOTP(phone: string, otpCode: string): Promise<VerifyResponse> {
+    let normalized = phone.replace(/\D/g, '');
+    if (normalized.startsWith('0')) normalized = '255' + normalized.slice(1);
+    if (!normalized.startsWith('255')) normalized = '255' + normalized;
+    normalized = '+' + normalized;
+
+    console.log('verifyOTP called with', normalized, otpCode);
+
     try {
-      const { data, error } = await supabase.rpc("verify_otp", {
-        _phone: phone,
-        _otp_code: otpCode,
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      if (!anonKey) {
+        console.error('VITE_SUPABASE_ANON_KEY is missing');
+        return { success: false, error: 'Configuration error: missing Supabase anon key' };
+      }
+      const response = await fetch(`${this.supabaseUrl}/functions/v1/verify-sms-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${anonKey}`,
+        },
+        body: JSON.stringify({ phone: normalized, otp: otpCode }),
       });
 
-      if (error) {
-        console.error("OTP verification error:", error);
-        return { success: false, error: error.message };
+      const data = await response.json();
+      console.log('verify-sms-otp response', response.status, data);
+      if (!response.ok) {
+        if (response.status === 401) {
+          return { success: false, error: 'Unauthorized (401) - check Supabase anon key in env' };
+        }
+        return { success: false, error: data.error || 'Verification failed' };
       }
-
+      // if the server returned Supabase tokens, apply them
+      const tokens: { access_token: string; refresh_token: string } | null =
+        data.access_token && data.refresh_token
+          ? { access_token: data.access_token, refresh_token: data.refresh_token }
+          : data.session_token && data.refresh_token
+          ? { access_token: data.session_token, refresh_token: data.refresh_token }
+          : null;
+      if (tokens) {
+        console.log('setting supabase session with tokens', tokens);
+        await supabase.auth.setSession(tokens);
+      }
       return data as VerifyResponse;
     } catch (error) {
-      console.error("OTP verification error:", error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Failed to verify OTP" 
+      console.error('OTP verification error:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to verify OTP',
       };
-    }
-  }
-
-  /**
-   * Login with phone number only (no OTP required after signup)
-   */
-  async loginWithPhone(phone: string): Promise<LoginResponse> {
-    try {
-      const { data, error } = await supabase.rpc("login_with_phone", {
-        _phone: phone,
-      });
-
-      if (error) {
-        console.error("Login error:", error);
-        return { success: false, error: error.message };
-      }
-
-      return data as LoginResponse;
-    } catch (error) {
-      console.error("Login error:", error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Failed to login" 
-      };
-    }
-  }
-
-  /**
-   * Validate an existing session token
-   */
-  async validateSession(token: string): Promise<SessionValidation> {
-    try {
-      const { data, error } = await supabase.rpc("validate_session", {
-        _token: token,
-      });
-
-      if (error) {
-        console.error("Session validation error:", error);
-        return { valid: false, error: error.message };
-      }
-
-      return data as SessionValidation;
-    } catch (error) {
-      console.error("Session validation error:", error);
-      return { 
-        valid: false, 
-        error: error instanceof Error ? error.message : "Failed to validate session" 
-      };
-    }
-  }
-
-  /**
-   * Invalidate a session (logout)
-   */
-  async invalidateSession(token: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      const { data, error } = await supabase.rpc("invalidate_session", {
-        _token: token,
-      });
-
-      if (error) {
-        console.error("Session invalidation error:", error);
-        return { success: false, error: error.message };
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Session invalidation error:", error);
-      return { 
-        success: false, 
-        error: error instanceof Error ? error.message : "Failed to invalidate session" 
-      };
-    }
-  }
-
-  /**
-   * Check if a user exists for the given phone number
-   */
-  async getUserByPhone(phone: string): Promise<{ exists: boolean; user?: any }> {
-    try {
-      const { data, error } = await supabase.rpc("get_user_by_phone", {
-        _phone: phone,
-      });
-
-      if (error) {
-        console.error("Get user error:", error);
-        return { exists: false };
-      }
-
-      return data;
-    } catch (error) {
-      console.error("Get user error:", error);
-      return { exists: false };
-    }
-  }
-
-  /**
-   * Store session token in localStorage
-   */
-  setSessionToken(token: string): void {
-    localStorage.setItem("session_token", token);
-  }
-
-  /**
-   * Get session token from localStorage
-   */
-  getSessionToken(): string | null {
-    return localStorage.getItem("session_token");
-  }
-
-  /**
-   * Clear session token from localStorage
-   */
-  clearSessionToken(): void {
-    localStorage.removeItem("session_token");
-  }
-
-  /**
-   * Store user data in localStorage for simulation mode
-   */
-  setSimulatedUser(phone: string, userData: any): void {
-    localStorage.setItem("simulated_phone", phone);
-    localStorage.setItem("simulated_user", JSON.stringify(userData));
-  }
-
-  /**
-   * Get simulated user from localStorage
-   */
-  getSimulatedUser(): { phone: string; user: any } | null {
-    const phone = localStorage.getItem("simulated_phone");
-    const userStr = localStorage.getItem("simulated_user");
-    
-    if (phone && userStr) {
-      return { phone, user: JSON.parse(userStr) };
-    }
-    return null;
-  }
-
-  /**
-   * Clear simulated user from localStorage
-   */
-  clearSimulatedUser(): void {
-    localStorage.removeItem("simulated_phone");
-    localStorage.removeItem("simulated_user");
-  }
-
-  /**
-   * Check if running in simulation mode
-   */
-  isSimulationMode(): boolean {
-    return localStorage.getItem("simulation_mode") === "true";
-  }
-
-  /**
-   * Enable/disable simulation mode
-   */
-  setSimulationMode(enabled: boolean): void {
-    if (enabled) {
-      localStorage.setItem("simulation_mode", "true");
-    } else {
-      localStorage.removeItem("simulation_mode");
     }
   }
 }

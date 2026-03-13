@@ -7,14 +7,12 @@ import { toast } from "sonner";
 
 interface PledgeGoalFormProps {
   userId?: string;
-  isSimulated?: boolean;
   currentPledge?: { pledge_amount: number; year: number } | null;
   onSuccess?: () => void;
 }
 
 const PledgeGoalForm = ({ 
   userId, 
-  isSimulated = false,
   currentPledge,
   onSuccess 
 }: PledgeGoalFormProps) => {
@@ -35,7 +33,7 @@ const PledgeGoalForm = ({
       return;
     }
 
-    if (!userId && !isSimulated) {
+    if (!userId) {
       toast.error("You must be logged in to make a pledge");
       return;
     }
@@ -43,13 +41,7 @@ const PledgeGoalForm = ({
     setIsSubmitting(true);
 
     try {
-      if (isSimulated) {
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setShowSuccess(true);
-        toast.success("Pledge saved successfully! (Demo Mode)");
-        onSuccess?.();
-      } else if (userId) {
+      if (userId) {
         // Check if pledge already exists for this user and year
         const { data: existingPledge } = await supabase
           .from("pledges")
@@ -246,11 +238,6 @@ const PledgeGoalForm = ({
         )}
       </motion.button>
 
-      {isSimulated && (
-        <p className="text-xs text-center text-muted-foreground">
-          Running in demo mode • No actual data saved
-        </p>
-      )}
     </form>
   );
 };

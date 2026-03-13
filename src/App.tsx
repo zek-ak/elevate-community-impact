@@ -18,7 +18,7 @@ const queryClient = new QueryClient();
 
 // Protected route wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading, isSimulated } = useAuth();
+  const { user, loading } = useAuth();
   
   if (loading) {
     return (
@@ -28,7 +28,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     );
   }
   
-  if (!user && !isSimulated) {
+  if (!user) {
     return <Navigate to="/" replace />;
   }
   
@@ -37,7 +37,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Auth page wrapper - redirects to dashboard if already logged in
 const AuthPage = () => {
-  const { user, loading, isSimulated } = useAuth();
+  const { user, loading } = useAuth();
   
   if (loading) {
     return (
@@ -47,7 +47,7 @@ const AuthPage = () => {
     );
   }
   
-  if (user || isSimulated) {
+  if (user) {
     return <Navigate to="/dashboard" replace />;
   }
   
